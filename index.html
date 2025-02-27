@@ -16,9 +16,9 @@
 
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.png">
+  <!-- <link rel="apple-touch-icon" href="icon.png">
   <link href="comp/css/index.css">
-  <link href="comp/css/solarized-light.css">
+  <link href="comp/css/solarized-light.css"> -->
 
   <link rel="manifest" href="site.webmanifest">
   <meta name="theme-color" content="#fafafa">
@@ -26,34 +26,89 @@
 
 <body>
 
-<style>
-  #com{
-    max-width: 500px;
-  }
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    .slider-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        height: 500px;
+        overflow: hidden;
+        margin: auto;
+    }
+    .before-img, .after-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+    }
+    .before-img {
+        background-image: url('img/one.jpg');
+    }
+    .after-img {
+        background-image: url('img/two.jpg');
+        clip-path: inset(50% 0 0 0);
+    }
+    .slider-line {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        cursor: ns-resize;
+        transform: translateY(-5px);
+    }
 </style>
+</head>
+<body>
+<div class="slider-container" id="slider">
+    <div class="before-img"></div>
+    <div class="after-img" id="after"></div>
+    <div class="slider-line" id="sliderLine"></div>
+</div>
+<script>
+    const sliderLine = document.getElementById('sliderLine');
+    const afterImg = document.getElementById('after');
+    let isDragging = false;
 
-  <div id="com">
-    <div class="images">
-      <div class="image-rgt" data-src="img/one.jpg"></div>
-      <div class="image-lft" data-src="img/two.jpg"></div>
-    </div>
-    <div class="ui">
-      <a class="button-rgt" alt="full size image of 2020">after</a>
-      <a class="button-lft" alt="full size image of 2019">before</a>
-    </div>
-  </div>
+    sliderLine.addEventListener('mousedown', (e) => {
+        isDragging = true;
+    });
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        startAutoMove();
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        let rect = sliderLine.parentElement.getBoundingClientRect();
+        let y = e.clientY - rect.top;
+        y = Math.max(0, Math.min(y, rect.height));
+        afterImg.style.clipPath = `inset(${y}px 0 0 0)`;
+        sliderLine.style.top = `${y}px`;
+    });
 
+    function startAutoMove() {
+        let direction = 1;
+        function autoMove() {
+            let currentClip = parseFloat(afterImg.style.clipPath.match(/\d+/)[0]);
+            if (currentClip <= 0 || currentClip >= 500) direction *= -1;
+            afterImg.style.clipPath = `inset(${currentClip + direction}px 0 0 0)`;
+            sliderLine.style.top = `${currentClip + direction}px`;
+            if (!isDragging) setTimeout(autoMove, 30);
+        }
+        setTimeout(autoMove, 5000);
+    }
+    startAutoMove();
+</script>
 
-  <script
-  src="https://code.jquery.com/jquery-3.7.1.min.js"
-  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-  crossorigin="anonymous"></script>
-<script src="comp/js/highlight.pack.js"></script>
-<script src="comp/js/jquery.anyimagecomparisonslider.min.js"></script>
-
-
-
-  <script src="js/app.js"></script>
 
 </body>
 
